@@ -1,3 +1,4 @@
+require 'faraday'
 class GSchoolFormatter < RSpec::Core::Formatters::ProgressFormatter
   # This registers the notifications this formatter supports, and tells
   # us that this was written against the RSpec 3.x formatter API.
@@ -26,6 +27,19 @@ class GSchoolFormatter < RSpec::Core::Formatters::ProgressFormatter
   end
 
   def start_dump(_notification)
+    conn = Faraday.new(:url => 'http://localhost:3000') do |faraday|
+      faraday.request  :url_encoded             # form-encode POST params
+      faraday.response :logger                  # log requests to STDOUT
+      faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
+    end
+    token = "1234"
+    response = conn.post do |req|
+      req.url '/test_results'
+      req.headers['X-Auth-Token'] = token
+      req.body = @things.to_json
+    end
+  
+
 
 
     # right here: post this as json to students.gschool.it
